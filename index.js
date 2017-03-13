@@ -1,6 +1,16 @@
 /** @jsx wtf */
 
 function wtf(nodeName, attributes, ...children) {
+    if (Array.isArray(children)) {
+        children = children.reduce((children, child) => {
+            if (!Array.isArray(child)) {
+                child = [child];
+            }
+
+            return children.concat(child);
+        }, []);
+    }
+
     return {nodeName, attributes, children};
 }
 
@@ -77,13 +87,20 @@ let AndComposable = ({makeItRed}) => (
     </span>
 );
 
-let Main = ({size}) => (
-    <body onclick={increaseSize} style="min-height: 100vh">
-        <div style={`font-size: ${size || 16}px;`}>
-            <span>WTF virtual dom is </span>
-            <strong>so damn cool </strong>
-            <AndComposable makeItRed={true} />
-        </div>
+let Page = (props) => (
+    <div {...props}>
+        <span>WTF virtual dom is </span>
+        <strong>so damn cool </strong>
+        <AndComposable makeItRed={true} />
+    </div>
+)
+
+let Main = ({size, childs}) => (
+    <body style={`font-size: ${size || 16}px; min-height: 100vh;`}>
+        <input type="number" oninput={setChilds}  value={childs} />
+        {Array.apply(null, {length: childs}).map(() => (
+            <Page onclick={increaseSize} />
+        ))}
     </body>
 );
 
@@ -95,8 +112,14 @@ let updateState = (newState) => {
     render(<Main {...state}/>, document.body);
 }
 
-let increaseSize = () => {
-    updateState({size: state.size + 1});
+let increaseSize = function () {
+    updateState({...state, size: state.size + 1});
 }
 
-updateState({size: 16});
+let setChilds = function () {
+    if (!isNaN(parseInt(this.value, 10))) {
+        updateState({...state, childs: parseInt(this.value, 10)});
+    }
+}
+
+updateState({size: 16, childs: 1});
