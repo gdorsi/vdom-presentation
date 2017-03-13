@@ -78,7 +78,7 @@ let AndComposable = ({makeItRed}) => (
 );
 
 let Main = ({size}) => (
-    <body>
+    <body onclick={increaseSize} style="min-height: 100vh">
         <div style={`font-size: ${size || 16}px;`}>
             <span>WTF virtual dom is </span>
             <strong>so damn cool </strong>
@@ -87,8 +87,16 @@ let Main = ({size}) => (
     </body>
 );
 
-render(<Main />, document.body);
+let state;
 
-setTimeout(() => {
-    render(<Main size={20}/>, document.body);
-}, 2000);
+let updateState = (newState) => {
+    state = newState;
+
+    render(<Main {...state}/>, document.body);
+}
+
+let increaseSize = () => {
+    updateState({size: state.size + 1});
+}
+
+updateState({size: 16});
