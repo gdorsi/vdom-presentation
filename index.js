@@ -9,26 +9,41 @@ function render(vnode) {
         return document.createTextNode(vnode);
     }
 
-    let node = document.createElement(vnode.nodeName);
+    let {nodeName, attributes, children} = vnode;
 
-    Object.keys(vnode.attributes || {}).forEach((name) => {
+    if (typeof nodeName === 'function') {
+        return render(nodeName(attributes || {}, children));
+    }
+
+    let node = document.createElement(nodeName);
+
+    Object.keys(attributes || {}).forEach((name) => {
         name in node
-            ? node[name] = vnode.attributes[name]
-            : node.setAttribute(name, vnode.attributes[name]);
+            ? node[name] = attributes[name]
+            : node.setAttribute(name, attributes[name]);
     });
 
-    (vnode.children || []).forEach((child) => {
+    (children || []).forEach((child) => {
         node.appendChild(render(child));
     });
 
     return node;
 }
 
-let vdom = (
+let AndComposable = ({makeItRed}) => (
+    <span style={makeItRed ? 'color: red;' : ''}>
+        and composable!
+    </span>
+);
+
+let Main = () => (
     <div style="font-size: 16px;">
-        <span>WTF virtual dom</span>
-        <strong> is so damn cool!</strong>
+        <span>WTF virtual dom is </span>
+        <strong>so damn cool </strong>
+        <AndComposable makeItRed={true} />
     </div>
 );
 
-document.body.appendChild(render(vdom));
+let node = render(<Main />);
+
+document.body.appendChild(node);
